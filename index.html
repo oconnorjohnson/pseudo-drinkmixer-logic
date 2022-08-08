@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <button type="button" onclick="updateIngredients('Tequila')">
+            Tequila
+        </button>
+        <button type="button" onclick="updateIngredients('Vodka')">
+            Vodka
+        </button>
+        <button type="button" onclick="updateIngredients('Whiskey')">
+            Whiskey
+        </button>
+        <button type="button" onclick="updateIngredients('Gin')">
+            Gin
+        </button>
+    </div>
+    <div style="height:20px">
+
+    </div>
+    <div>
+        <button type="button" onclick="updateIngredients('Lemon Wedge')">
+            Lemon Wedge
+        </button>
+        <button type="button" onclick="updateIngredients('Lime')">
+            Lime 
+        </button>
+        <button type="button" onclick="updateIngredients('Cream')">
+            Cream
+        </button>
+        <button type="button" onclick="updateIngredients('Coke')">
+            Coke
+        </button>
+    </div>
+
+    <div id="drinkCounter">
+    </div>
+    <div id="listOfDrinks">
+    </div>
+
+    <script>
+    
+    // set list of ingredient array
+    listOfIngredients = []
+    drinkCount = 0
+    
+    // function to force buttons to add ingredients if they are not on list or delete if they are on list
+    function updateIngredients(ingredient) {
+        if (!listOfIngredients.includes(ingredient)) {
+            this.listOfIngredients[this.listOfIngredients.length]=ingredient
+        } else {
+            this.listOfIngredients.splice(this.listOfIngredients.indexOf(ingredient), 1) 
+        }
+        this.rateDrink();
+    } 
+
+    // function to rate drink based on chosen ingredients found matching in dataset
+    function rateDrink() {
+        // parse json data file into javascript
+        fetch('./cocktail.json').then(response=>response.json())
+        .then(data => { 
+            // set our number of drinks starting at zero and define list of possible drinks as an empty array
+            numberOfDrinks = 0
+            listOfPossibleDrinks=[]
+            // create an array of the ingredients of each drink in the dataset so we only see ingredients
+            data.forEach(drink => {
+                currentIngredients=[]
+                
+                // here we are checking to only include data labeled strIngredient, and only if said variable is not null
+                for (key in drink) {
+                    if (key.includes("strIngredient") && drink[key]!==null && drink[key] !== "") {
+                        // console.log(key, drink[key])
+                        currentIngredients[currentIngredients.length] = drink[key]
+
+                    }
+                }
+                // this is where we're checking our selected ingredients vs the current drink's ingredients from the data set
+                matches = 0
+                listOfIngredients.forEach(ingredient => {
+                    currentIngredients.forEach(currentIngredient => {
+                        // increase matches for every drink with ingredients matching selected ingredients
+                        if (currentIngredient.includes(ingredient)) {
+                            matches +=1 
+                        }
+                    })
+                })
+                // if every ingredient added by user exists in the cocktail, return true
+                if (matches >= listOfIngredients.length) {
+                    numberOfDrinks +=1
+                    // console.log(currentIngredients, listOfIngredients)
+                    listOfPossibleDrinks[listOfPossibleDrinks.length] = currentIngredients
+                }
+            })
+            // showing results on the page
+            console.log(numberOfDrinks, listOfIngredients, listOfPossibleDrinks)
+            drinkCount=1
+            hld = [] 
+            listOfPossibleDrinks.forEach(drink => {
+                console.log('drink #', drinkCount, ': ', drink)
+                drinkCount+=1
+                hld[hld.length] = drink
+                hld[hld.length] = ["~"]
+            })
+            this.drinkCount=drinkCount
+            document.getElementById("drinkCounter").innerHTML = this.drinkCount;
+            document.getElementById("listOfDrinks").innerHTML = hld;
+        })
+    }
+
+    </script>
+</body>
+</html>
